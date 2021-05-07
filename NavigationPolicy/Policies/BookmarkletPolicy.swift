@@ -30,13 +30,12 @@ public class BookmarkletPolicy: NavigationActionPolicy {
         self.evaluateJavaScript = evaluateJavaScript
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         guard let js = js() else {
-            completion(.allow, nil)
-            return
+            return .allow
         }
 
-        completion(.cancel) {
+        return NavigationActionResult(action: .cancel) {
             self.evaluateJavaScript(js)
         }
     }

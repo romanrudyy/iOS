@@ -28,18 +28,17 @@ public class TargetBlankTabPolicy: NavigationActionPolicy {
         self.openInNewTab = openInNewTab
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         if let url = navigationAction.request.url,
            navigationAction.navigationType == .linkActivated,
            navigationAction.targetFrame == nil {
 
-            completion(.cancel) {
+            return NavigationActionResult(action: .cancel) {
                 self.openInNewTab(url)
             }
 
         } else {
-            completion(.allow, nil)
+            return .allow
         }
     }
 

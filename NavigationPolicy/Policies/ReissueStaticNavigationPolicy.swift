@@ -36,18 +36,16 @@ public class ReissueStaticNavigationPolicy: NavigationActionPolicy {
 
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         if let url = navigationAction.request.url,
            isDuckDuckGoStatic(url),
            !hasCorrectSearchHeaderParams(url) {
-            completion(.cancel) {
+            return NavigationActionResult(action: .cancel) {
                 self.reissueSearch(url)
             }
         } else {
-            completion(.allow, nil)
+            return .allow
         }
-
     }
 
 }

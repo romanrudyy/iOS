@@ -71,27 +71,26 @@ extension TabViewController {
         let allowPolicy = self.determineAllowPolicy()
         let appUrls = self.appUrls
 
-        NavigationActionPolicyChecker.checkAllPolicies(policies, forNavigationAction: navigationAction) { decision, cancelAction in
+        let result = NavigationActionPolicyChecker.check(policies: policies, for: navigationAction)
+        let decision = result.action
 
-            if decision == .cancel {
-                decisionHandler(decision)
-                cancelAction?()
-                return
-            }
-
-            // From iOS 12 we can set the UA dynamically, this lets us update it as needed for specific sites
-            if #available(iOS 12, *) {
-                UserAgentManager.shared.update(webView: webView, isDesktop: tabModel.isDesktop, url: url)
-            }
-
-            if let url = navigationAction.request.url, appUrls.isDuckDuckGoSearch(url: url) {
-                StatisticsLoader.shared.refreshSearchRetentionAtb()
-                self.findInPage?.done()
-            }
-
-            decisionHandler(allowPolicy)
-
+        if decision == .cancel {
+            decisionHandler(decision)
+            result.cancellationHandler?()
+            return
         }
+
+        // From iOS 12 we can set the UA dynamically, this lets us update it as needed for specific sites
+        if #available(iOS 12, *) {
+            UserAgentManager.shared.update(webView: webView, isDesktop: tabModel.isDesktop, url: url)
+        }
+
+        if let url = navigationAction.request.url, appUrls.isDuckDuckGoSearch(url: url) {
+            StatisticsLoader.shared.refreshSearchRetentionAtb()
+            self.findInPage?.done()
+        }
+
+        decisionHandler(allowPolicy)
     }
 
     func makeSmarterEncryptionPolicy() -> SmarterEncryptionUpgradePolicy {

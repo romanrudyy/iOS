@@ -38,19 +38,18 @@ public class GPCPolicy: NavigationActionPolicy {
         self.load = load
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         if navigationAction.targetFrame?.isMainFrame ?? false,
            ["http", "https"].contains(navigationAction.request.url?.scheme),
            navigationAction.navigationType != .backForward,
            let request = requestForDoNotSell(basedOn: navigationAction.request) {
 
-            completion(.cancel) {
+            return NavigationActionResult(action: .cancel) {
                 self.load(request)
             }
-            return
         }
 
-        completion(.allow, nil)
+        return .allow
     }
 
     private func requestForDoNotSell(basedOn incomingRequest: URLRequest) -> URLRequest? {

@@ -28,29 +28,21 @@ public class OpenInExternalAppPolicy: NavigationActionPolicy {
         self.presentOpenInExternalAppAlert = presentOpenInExternalAppAlert
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         guard let url = navigationAction.request.url else {
-            completion(.allow, nil)
-            return
+            return .allow
         }
 
-        func cancel() {
-            completion(.cancel) {
-                self.presentOpenInExternalAppAlert(url)
-            }
+        let cancelAction = NavigationActionResult(action: .cancel) {
+            self.presentOpenInExternalAppAlert(url)
         }
 
         let schemeType = SchemeHandler.schemeType(for: url)
         switch schemeType {
-        case .external(let action) where action == .askForConfirmation:
-            cancel()
-
-        case .unknown where navigationAction.navigationType != .linkActivated:
-            cancel()
-
+        case .external(let action) where action == .askForConfirmation: return cancelAction
+        case .unknown where navigationAction.navigationType != .linkActivated: return cancelAction
         default:
-            completion(.allow, nil)
+            return .allow
         }
     }
 }

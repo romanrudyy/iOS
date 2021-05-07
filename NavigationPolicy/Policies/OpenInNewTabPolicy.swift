@@ -36,17 +36,15 @@ public struct OpenInNewTabPolicy: NavigationActionPolicy {
         
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         guard navigationAction.navigationType == .linkActivated,
            let url = navigationAction.request.url,
            let modifiers = keyModifiers(),
            modifiers.command else {
-            completion(.allow, nil)
-            return
+            return .allow
         }
 
-        completion(.cancel) {
+        return NavigationActionResult(action: .cancel) {
             if modifiers.shift {
                 newTabForUrl(url)
             } else {
@@ -54,5 +52,4 @@ public struct OpenInNewTabPolicy: NavigationActionPolicy {
             }
         }
     }
-
 }

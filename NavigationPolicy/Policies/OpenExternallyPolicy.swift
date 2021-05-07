@@ -28,31 +28,25 @@ public class OpenExternallyPolicy: NavigationActionPolicy {
         self.openExternally = openExternally
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         guard let url = navigationAction.request.url else {
-            completion(.allow, nil)
-            return
+            return .allow
         }
 
-        func cancel() {
-            completion(.cancel) {
-                self.openExternally(url)
-            }
+        let cancel = NavigationActionResult(action: .cancel) {
+            self.openExternally(url)
         }
 
         let schemeType = SchemeHandler.schemeType(for: url)
         switch schemeType {
         case .external(let action) where action == .open:
-            cancel()
-
+            return cancel
         case .unknown where navigationAction.navigationType == .linkActivated:
-            cancel()
+            return cancel
         default:
-            completion(.allow, nil)
+            return .allow
 
         }
-
     }
 
 }

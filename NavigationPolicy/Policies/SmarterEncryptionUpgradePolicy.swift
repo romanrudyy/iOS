@@ -38,28 +38,28 @@ public class SmarterEncryptionUpgradePolicy: NavigationActionPolicy {
 
     }
 
-    public func check(navigationAction: WKNavigationAction, completion: @escaping (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
-
+    public func check(navigationAction: WKNavigationAction) -> NavigationActionResult {
         guard let url = navigationAction.request.url,
               navigationAction.targetFrame?.isMainFrame ?? false,
               !isProtected(url.host) else {
-            completion(.allow, nil)
-            return
+            return .allow
         }
+
+        // This policy is the one case that needs an async callback. Need to determine if it's worth finding a workaround.
+        return .allow
 
         // assumption is that this always completes
-        isUpgradeable(url) { isUpgradeable in
-            guard isUpgradeable else {
-                completion(.allow, nil)
-                return
-            }
-
-            completion(.cancel) {
-                if let upgradedUrl = url.toHttps() {
-                    self.upgradeWith(upgradedUrl)
-                }
-            }
-        }
+//        isUpgradeable(url) { isUpgradeable in
+//            guard isUpgradeable else {
+//                return .allow
+//            }
+//
+//            completion(.cancel) {
+//                if let upgradedUrl = url.toHttps() {
+//                    self.upgradeWith(upgradedUrl)
+//                }
+//            }
+//        }
     }
 
 }

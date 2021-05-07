@@ -20,31 +20,37 @@
 import Foundation
 import WebKit
 
+public struct NavigationActionResult {
+    public let action: WKNavigationActionPolicy
+    public let cancellationHandler: NavigationActionCancellation?
+
+    static var allow: NavigationActionResult {
+        NavigationActionResult(action: .allow, cancellationHandler: nil)
+    }
+}
+
+public typealias NavigationActionCancellation = () -> Void
+
 public protocol NavigationActionPolicy {
 
-    /// The completion handler must be called or else `webView:decidePolicyForNavigationAction:decisionHandler:` will not be called and will crash the app.
-    func check(navigationAction: WKNavigationAction,
-               completion: @escaping (WKNavigationActionPolicy, (() -> Void)?) -> Void)
+    func check(navigationAction: WKNavigationAction) -> NavigationActionResult
 
 }
 
 public struct NavigationActionPolicyChecker {
 
-    public static func checkAllPolicies(_ policies: [NavigationActionPolicy],
-                                        forNavigationAction action: WKNavigationAction,
-                                        _ completion: @escaping (WKNavigationActionPolicy, (() -> Void)?) -> Void) {
+    public static func check(policies: [NavigationActionPolicy], for navigationAction: WKNavigationAction) -> NavigationActionResult {
 
         guard let nextPolicy = policies.first else {
-            completion(.allow, nil)
-            return
+            return NavigationActionResult(action: .allow, cancellationHandler: nil)
         }
 
-        nextPolicy.check(navigationAction: action) { result, cancellationAction in
-            if result == .cancel {
-                completion(result, cancellationAction)
-            } else {
-                Self.checkAllPolicies(Array(policies.dropFirst()), forNavigationAction: action, completion)
-            }
+        let result = nextPolicy.check(navigationAction: navigationAction)
+
+        if result.action == .cancel {
+            return result
+        } else {
+            return check(policies: Array(policies.dropFirst()), for: navigationAction)
         }
     }
 
