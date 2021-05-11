@@ -35,7 +35,7 @@ public class HTTPSUpgrade {
         self.appUrls = appUrls
     }
 
-    public func isUgradeable(url: URL, completion: @escaping UpgradeCheckCompletion) {
+    public func isUgradeable(url: URL, completion: UpgradeCheckCompletion) {
         
         guard url.scheme == "http" else {
             completion(false)

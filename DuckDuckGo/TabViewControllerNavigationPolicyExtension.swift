@@ -78,11 +78,27 @@ extension TabViewController {
             if action == .cancel {
                 decisionHandler(action)
                 cancellation?()
+            } else {
+                decisionHandler(action)
             }
 
             return
-        case .deferred:
-            Swift.print("Deferred")
+        case .deferred(let handler):
+            handler { result in
+                switch result {
+                case .immediate(let action, let cancellation):
+                    if action == .cancel {
+                        decisionHandler(action)
+                        cancellation?()
+                    } else {
+                        decisionHandler(action)
+                    }
+                case .deferred(_):
+                    // Handle nested deferred action call
+                    return
+                }
+            }
+
             return
         }
 
@@ -119,7 +135,7 @@ extension TabViewController {
         })
     }
 
-    func isUpgradeable(_ url: URL, completion: @escaping (Bool) -> Void) {
+    func isUpgradeable(_ url: URL, completion: (Bool) -> Void) {
         HTTPSUpgrade.shared.isUgradeable(url: url, completion: completion)
     }
 

@@ -23,12 +23,12 @@ public class SmarterEncryptionUpgradePolicy: NavigationActionPolicy {
 
     private let lastUpgradedURL: URL?
     private let isProtected: (String?) -> Bool
-    private let isUpgradeable: (URL, @escaping (Bool) -> Void) -> Void
+    private let isUpgradeable: (URL, (Bool) -> Void) -> Void
     private let upgradeWith: (URL) -> Void
 
     public init(lastUpgradedURL: URL?,
                 isProtected: @escaping (String?) -> Bool,
-                isUpgradeable: @escaping (URL, @escaping (Bool) -> Void) -> Void,
+                isUpgradeable: @escaping (URL, (Bool) -> Void) -> Void,
                 upgradeWith: @escaping (URL) -> Void) {
 
         self.lastUpgradedURL = lastUpgradedURL
@@ -45,21 +45,22 @@ public class SmarterEncryptionUpgradePolicy: NavigationActionPolicy {
             return .allow
         }
 
-        // This policy is the one case that needs an async callback. Need to determine if it's worth finding a workaround.
-        return .allow
+        return .deferred({ deferredCompletion in
 
-        // assumption is that this always completes
-//        isUpgradeable(url) { isUpgradeable in
-//            guard isUpgradeable else {
-//                return .allow
-//            }
-//
-//            completion(.cancel) {
-//                if let upgradedUrl = url.toHttps() {
-//                    self.upgradeWith(upgradedUrl)
-//                }
-//            }
-//        }
+            self.isUpgradeable(url) { isUpgradeable in
+                guard isUpgradeable else {
+                    deferredCompletion(NavigationActionResult.allow)
+                    return
+                }
+
+                deferredCompletion(NavigationActionResult.immediate(.cancel, {
+                    if let upgradedUrl = url.toHttps() {
+                        self.upgradeWith(upgradedUrl)
+                    }
+                }))
+            }
+
+        })
     }
 
 }

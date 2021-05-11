@@ -20,24 +20,16 @@
 import Foundation
 import WebKit
 
-typealias Closure = (WKNavigationActionPolicy) -> Void
+public typealias NavigationActionResultCompletion = (NavigationActionResult) -> Void
 public typealias NavigationActionCancellation = () -> Void
+public typealias NavigationActionDeferredCompletion = (NavigationActionResultCompletion) -> Void
 
 public enum NavigationActionResult {
     case immediate(WKNavigationActionPolicy, NavigationActionCancellation?)
-    case deferred
+    case deferred(NavigationActionDeferredCompletion)
 
     static var allow = NavigationActionResult.immediate(.allow, nil)
 }
-
-//public struct NavigationActionResult {
-//    public let action: WKNavigationActionPolicy
-//    public let cancellationHandler: NavigationActionCancellation?
-//
-//    static var allow: NavigationActionResult {
-//        NavigationActionResult(action: .allow, cancellationHandler: nil)
-//    }
-//}
 
 public protocol NavigationActionPolicy {
 
