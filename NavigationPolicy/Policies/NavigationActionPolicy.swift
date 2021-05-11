@@ -20,16 +20,24 @@
 import Foundation
 import WebKit
 
-public struct NavigationActionResult {
-    public let action: WKNavigationActionPolicy
-    public let cancellationHandler: NavigationActionCancellation?
+typealias Closure = (WKNavigationActionPolicy) -> Void
+public typealias NavigationActionCancellation = () -> Void
 
-    static var allow: NavigationActionResult {
-        NavigationActionResult(action: .allow, cancellationHandler: nil)
-    }
+public enum NavigationActionResult {
+    case immediate(WKNavigationActionPolicy, NavigationActionCancellation?)
+    case deferred
+
+    static var allow = NavigationActionResult.immediate(.allow, nil)
 }
 
-public typealias NavigationActionCancellation = () -> Void
+//public struct NavigationActionResult {
+//    public let action: WKNavigationActionPolicy
+//    public let cancellationHandler: NavigationActionCancellation?
+//
+//    static var allow: NavigationActionResult {
+//        NavigationActionResult(action: .allow, cancellationHandler: nil)
+//    }
+//}
 
 public protocol NavigationActionPolicy {
 
@@ -42,12 +50,12 @@ public struct NavigationActionPolicyChecker {
     public static func check(policies: [NavigationActionPolicy], for navigationAction: WKNavigationAction) -> NavigationActionResult {
 
         guard let nextPolicy = policies.first else {
-            return NavigationActionResult(action: .allow, cancellationHandler: nil)
+            return .allow
         }
 
         let result = nextPolicy.check(navigationAction: navigationAction)
 
-        if result.action == .cancel {
+        if case let .immediate(policy, _) = result, policy == .cancel {
             return result
         } else {
             return check(policies: Array(policies.dropFirst()), for: navigationAction)

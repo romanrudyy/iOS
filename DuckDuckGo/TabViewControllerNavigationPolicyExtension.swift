@@ -72,11 +72,17 @@ extension TabViewController {
         let appUrls = self.appUrls
 
         let result = NavigationActionPolicyChecker.check(policies: policies, for: navigationAction)
-        let decision = result.action
 
-        if decision == .cancel {
-            decisionHandler(decision)
-            result.cancellationHandler?()
+        switch result {
+        case .immediate(let action, let cancellation):
+            if action == .cancel {
+                decisionHandler(action)
+                cancellation?()
+            }
+
+            return
+        case .deferred:
+            Swift.print("Deferred")
             return
         }
 

@@ -33,9 +33,9 @@ public class TargetBlankTabPolicy: NavigationActionPolicy {
            navigationAction.navigationType == .linkActivated,
            navigationAction.targetFrame == nil {
 
-            return NavigationActionResult(action: .cancel) {
+            return .immediate(.cancel, {
                 self.openInNewTab(url)
-            }
+            })
 
         } else {
             return .allow

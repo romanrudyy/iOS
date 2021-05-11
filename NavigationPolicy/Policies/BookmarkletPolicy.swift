@@ -35,9 +35,9 @@ public class BookmarkletPolicy: NavigationActionPolicy {
             return .allow
         }
 
-        return NavigationActionResult(action: .cancel) {
+        return .immediate(.cancel, {
             self.evaluateJavaScript(js)
-        }
+        })
     }
 
 }

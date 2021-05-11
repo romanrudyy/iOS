@@ -44,9 +44,9 @@ public class GPCPolicy: NavigationActionPolicy {
            navigationAction.navigationType != .backForward,
            let request = requestForDoNotSell(basedOn: navigationAction.request) {
 
-            return NavigationActionResult(action: .cancel) {
+            return .immediate(.cancel, {
                 self.load(request)
-            }
+            })
         }
 
         return .allow

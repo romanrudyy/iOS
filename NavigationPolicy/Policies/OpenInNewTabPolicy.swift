@@ -44,12 +44,12 @@ public struct OpenInNewTabPolicy: NavigationActionPolicy {
             return .allow
         }
 
-        return NavigationActionResult(action: .cancel) {
+        return .immediate(.cancel, {
             if modifiers.shift {
                 newTabForUrl(url)
             } else {
                 newBackgroundTabForURL(url)
             }
-        }
+        })
     }
 }

@@ -33,9 +33,9 @@ public class OpenExternallyPolicy: NavigationActionPolicy {
             return .allow
         }
 
-        let cancel = NavigationActionResult(action: .cancel) {
+        let cancel = NavigationActionResult.immediate(.cancel, {
             self.openExternally(url)
-        }
+        })
 
         let schemeType = SchemeHandler.schemeType(for: url)
         switch schemeType {

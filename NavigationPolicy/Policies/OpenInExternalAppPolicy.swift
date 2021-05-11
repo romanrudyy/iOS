@@ -33,9 +33,9 @@ public class OpenInExternalAppPolicy: NavigationActionPolicy {
             return .allow
         }
 
-        let cancelAction = NavigationActionResult(action: .cancel) {
+        let cancelAction = NavigationActionResult.immediate(.cancel, {
             self.presentOpenInExternalAppAlert(url)
-        }
+        })
 
         let schemeType = SchemeHandler.schemeType(for: url)
         switch schemeType {

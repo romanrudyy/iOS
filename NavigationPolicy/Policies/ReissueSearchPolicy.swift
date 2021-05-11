@@ -43,9 +43,9 @@ public class ReissueSearchPolicy: NavigationActionPolicy {
         if let url = navigationAction.request.url,
            isDuckDuckGoSearch(url),
            (!hasCorrectStatsParams(url) || !hasCorrectSearchHeaderParams(url)) {
-            return NavigationActionResult(action: .cancel) {
+            return .immediate(.cancel, {
                 self.reissueSearch(url)
-            }
+            })
         } else {
             return .allow
         }
